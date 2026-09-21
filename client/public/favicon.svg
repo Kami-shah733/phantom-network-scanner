@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <!-- Green border shield -->
+  <path
+    d="M8 1.2L14 4v4.2c0 3-2.3 5.6-6 6.8C4.3 13.8 2 11.2 2 8.2V4l6-2.8z"
+    fill="#00ff66"
+  />
+
+  <!-- Inner black cut (gives border effect) -->
+  <path
+    d="M8 2.6L12.7 5v3c0 2.3-1.7 4.2-4.7 5.2C5 12.2 3.3 10.3 3.3 8V5L8 2.6z"
+    fill="#000000"
+  />
+</svg>
