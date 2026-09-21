@@ -83,15 +83,126 @@ Do not commit `.env` files or API keys.
 - `GET /export-csv`: export scan history
 - `DELETE /clear-history`: remove saved scan history
 
-## Production Notes
+## Deployment Status
 
-For deployment:
+The current free deployment uses two parts:
 
-1. Deploy the FastAPI server with a production ASGI command such as `uvicorn main:app --host 0.0.0.0 --port $PORT`.
-2. Install Nmap on the server and verify it is available on `PATH`.
-3. Set `APP_ENV=production`, `APP_API_TOKEN`, `FRONTEND_URL`, and `ALLOWED_HOSTS` in the server environment.
-4. Build the dashboard with `npm run build` and serve the generated `client/dist` directory from a static host.
-5. Set `VITE_API_URL` to the deployed API URL before building the client.
+- Frontend: Vercel at `https://client-liard-two-32.vercel.app`
+- Backend: FastAPI running locally and exposed through a temporary `localhost.run` HTTPS tunnel
+
+The frontend is permanently hosted by Vercel, but the backend is only available while the local computer, API process, and tunnel process are running. The tunnel URL can change after a restart.
+
+## Free Deployment Runbook
+
+### Start the backend after powering on the computer
+
+Open PowerShell terminal 1 from the repository root:
+
+```powershell
+cd C:\Users\PCP\Desktop\phantom-network-scanner-master\server
+.\.venv\Scripts\Activate.ps1
+$env:ALLOWED_HOSTS="*"
+$env:FRONTEND_URL="https://client-liard-two-32.vercel.app"
+python -m uvicorn main:app --host 127.0.0.1 --port 8001
+```
+
+Keep this terminal open. It runs the FastAPI backend and Nmap scanner.
+
+Open PowerShell terminal 2:
+
+```powershell
+ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R 80:127.0.0.1:8001 nokey@localhost.run
+```
+
+Keep this terminal open. It prints a public URL similar to:
+
+```text
+https://random-name.lhr.life
+```
+
+Test the tunnel before using it:
+
+```powershell
+curl.exe https://random-name.lhr.life/
+```
+
+The response should be:
+
+```json
+{"message":"PHANTOM API Base is Online!"}
+```
+
+### Connect a new tunnel URL to Vercel
+
+The frontend stores the backend URL at build time. If the tunnel URL changes, update the Vercel production variable and redeploy:
+
+```powershell
+cd C:\Users\PCP\Desktop\phantom-network-scanner-master\client
+npx vercel env rm VITE_API_URL production --yes
+"https://NEW-TUNNEL-URL.lhr.life" | npx vercel env add VITE_API_URL production
+npx vercel --prod --yes
+```
+
+After deployment, open `https://client-liard-two-32.vercel.app` and refresh the page.
+
+### Stop the backend and tunnel
+
+Press `Ctrl+C` in the tunnel terminal first, then press `Ctrl+C` in the backend terminal. Closing the terminals or shutting down the computer has the same effect.
+
+### What happens after shutdown
+
+- The Vercel frontend remains online.
+- The backend stops.
+- The tunnel stops.
+- History and scanning fail until both processes are started again.
+- A new tunnel usually gets a new URL, so update Vercel again before scanning.
+
+## Environment Variables
+
+### Client: `client/.env`
+
+```env
+VITE_API_URL=https://your-backend-url
+VITE_API_TOKEN=optional-server-token
+```
+
+`VITE_*` values are embedded in the browser bundle. Never put private secrets in them.
+
+### Server: `server/.env`
+
+```env
+APP_ENV=development
+API_PORT=8000
+FRONTEND_URL=http://localhost:5173
+ALLOWED_HOSTS=localhost,127.0.0.1
+APP_API_TOKEN=
+SCAN_PORT_SPEC=--top-ports 20
+GEMINI_MODEL=gemini-2.0-flash
+GEMINI_API_KEY=
+```
+
+For the temporary public tunnel, set `ALLOWED_HOSTS=*` and set `FRONTEND_URL` to the Vercel URL in the terminal before starting Uvicorn. Do not commit `.env` files, API tokens, Gemini keys, or the local SQLite database.
+
+## Permanent Hosting Options
+
+The local tunnel is free but temporary. For a backend that runs without your computer, use a host that supports Docker, Python, and Nmap:
+
+- Render: free web service with card verification; `render.yaml` and `server/Dockerfile` are included.
+- Railway: requires an active paid plan for this account.
+- Hugging Face Spaces: free Spaces are static; Docker compute requires a paid plan.
+- Vercel: suitable for this React frontend, but not for the long-running Nmap backend.
+
+For Render, create a Blueprint from this repository and use the root `render.yaml`. Configure `FRONTEND_URL`, `ALLOWED_HOSTS`, `APP_API_TOKEN`, and optional `GEMINI_API_KEY`. After Render provides an API URL, set it as Vercel's `VITE_API_URL` and redeploy the frontend. Do not use `ALLOWED_HOSTS=*` for a permanent public production service; use the exact API hostname instead.
+
+## Security Precautions
+
+- Only scan hosts you own or have permission to test.
+- Do not expose the backend without authentication in a permanent deployment.
+- Use `APP_API_TOKEN` and configure the same value as the client `VITE_API_TOKEN` when required.
+- Do not share `.env`, `.env.local`, API keys, or database files.
+- The temporary tunnel URL is public while it is running.
+- Anyone who can reach an unauthenticated scan endpoint may be able to use your computer to send scans.
+- Keep Nmap and Npcap updated.
 
 ## Validation
 
