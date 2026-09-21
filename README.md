@@ -159,6 +159,8 @@ Press `Ctrl+C` in the tunnel terminal first, then press `Ctrl+C` in the backend 
 
 ## Environment Variables
 
+The configuration blocks below are examples only. They do not contain real credentials. Create local `.env` files from the provided `.env.example` files, and replace placeholder values locally.
+
 ### Client: `client/.env`
 
 ```env
