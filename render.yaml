@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: phantom-network-scanner-api
+    runtime: docker
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
+    healthCheckPath: /
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: FRONTEND_URL
+        value: https://client-liard-two-32.vercel.app
+      - key: ALLOWED_HOSTS
+        value: "*.onrender.com"
+      - key: APP_API_TOKEN
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
