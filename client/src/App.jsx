@@ -88,9 +88,16 @@ export default function App() {
     } catch (error) {
       clearInterval(interval);
       let errMsg = "Scan failed. Check target IP or Nmap setup.";
-      if (error.response?.data?.detail) {
-        const detail = error.response.data.detail;
-        errMsg = Array.isArray(detail) ? detail[0].msg.replace("Value error, ", "") : detail;
+      const responseData = error.response?.data;
+      if (responseData?.detail) {
+        const detail = responseData.detail;
+        errMsg = Array.isArray(detail)
+          ? detail.map((item) => item.msg).filter(Boolean).join("; ")
+          : detail;
+      } else if (typeof responseData === "string" && responseData.trim()) {
+        errMsg = responseData.trim().slice(0, 200);
+      } else if (error.response?.status) {
+        errMsg = `Request failed with status ${error.response.status}.`;
       }
       setScanStatus("Error: " + errMsg);
       setScanError(errMsg);
@@ -180,7 +187,7 @@ export default function App() {
 
       {/* VIEW 2: HISTORY TAB */}
       {activeTab === "History" && (
-        <div style={{ padding: "30px" }}>
+        <div className="p-page">
           <div className="p-sec-hdr" style={{ marginBottom: "20px" }}><div className="p-sec-title"><div className="p-sec-bar"></div>Complete Scan History Log</div></div>
           <div className="p-table-wrap" style={{ background: "var(--surface)", padding: "20px" }}><ScanHistory history={history} /></div>
         </div>
@@ -188,7 +195,7 @@ export default function App() {
 
       {/* VIEW 3: REPORTS TAB */}
       {activeTab === "Reports" && (
-        <div style={{ padding: "30px" }}>
+        <div className="p-page">
           <div className="p-sec-hdr" style={{ marginBottom: "20px" }}>
             <div className="p-sec-title"><div className="p-sec-bar"></div>AI Threat Intelligence Reports</div>
             <span className="p-sec-badge" style={{ color: "var(--blue)", border: "1px solid var(--blue)" }}>Powered by Gemini</span>
@@ -199,7 +206,7 @@ export default function App() {
 
       {/* VIEW 4: SETTINGS TAB */}
       {activeTab === "Settings" && (
-        <div style={{ padding: "30px" }}>
+        <div className="p-page">
           <div className="p-sec-hdr" style={{ marginBottom: "20px" }}>
             <div className="p-sec-title"><div className="p-sec-bar"></div>System Settings</div>
           </div>

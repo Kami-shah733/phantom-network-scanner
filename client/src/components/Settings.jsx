@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 
 const API_TOKEN = import.meta.env.VITE_API_TOKEN || "";
@@ -9,20 +9,11 @@ export default function Settings({ history, setHistory }) {
   const [error, setError] = useState(null);
 
   // API Key States
-  const [apiKey, setApiKey] = useState("");
-  const [isKeySaved, setIsKeySaved] = useState(false);
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem("gemini_api_key") || "");
+  const [isKeySaved, setIsKeySaved] = useState(() => Boolean(localStorage.getItem("gemini_api_key")));
   const [showKey, setShowKey] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-
-  // Component mount hone par localStorage se key read karein
-  useEffect(() => {
-    const savedKey = localStorage.getItem("gemini_api_key");
-    if (savedKey) {
-      setApiKey(savedKey);
-      setIsKeySaved(true);
-    }
-  }, []);
 
   const handleSaveKey = () => {
     if (!apiKey.trim()) {

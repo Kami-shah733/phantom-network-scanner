@@ -12,7 +12,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
 
   return (
     <nav className="p-nav">
-      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+      <div className="p-nav-main">
         <div className="p-logo">
           <div className="p-logo-box">
             <svg viewBox="0 0 16 16"><path d="M8 1L15 4.5V8C15 11.5 11.5 14.5 8 15C4.5 14.5 1 11.5 1 8V4.5L8 1Z"/></svg>

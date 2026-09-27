@@ -2,6 +2,8 @@
 
 Phantom Network Scanner is a full-stack network security dashboard. It scans IPv4 targets with Nmap, reports responsive and filtered TCP ports, calculates a rule-based threat score, and optionally generates Gemini threat reports.
 
+See [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md) for the architecture, technologies, scan lifecycle, risk model, API, configuration, and deployment details.
+
 ## Project Structure
 
 - `client/`: React + Vite dashboard

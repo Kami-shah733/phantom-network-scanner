@@ -112,6 +112,10 @@ app = FastAPI(title="Phantom Network Scanner (ML Edition)")
 
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
 
+allowed_origins = [FRONTEND_URL] if FRONTEND_URL else []
+if APP_ENV != "production":
+    allowed_origins.extend(("http://localhost:5173", "http://127.0.0.1:5173"))
+
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -123,7 +127,7 @@ async def add_security_headers(request: Request, call_next):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
