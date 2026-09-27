@@ -1,4 +1,48 @@
-# Phantom Network Scanner: Technical Documentation
+# Phantom Network Scanner: Project Guide and Technical Documentation
+
+## Start Here: Plain-Language Summary
+
+Phantom Network Scanner is a small web application for checking which common network ports respond on a chosen IP address. The user enters an IP in the dashboard. A Python backend asks Nmap to check the selected host, then the application displays the port results, assigns a simple risk score, and saves the scan so it can be reviewed later.
+
+The project has two separate parts: the React website is the control panel, and the FastAPI server is the part that actually runs Nmap. The optional machine-learning feature looks for scan results that differ from earlier saved results. The optional Gemini feature turns scan details into a readable security report. Neither AI feature performs the network scan itself.
+
+This is an educational port-scanning and risk-summary project. It does not exploit systems, prove that a host is vulnerable, or replace a professional vulnerability assessment. Only scan hosts you own or have permission to test.
+
+## One-Minute Project Brief
+
+> Phantom Network Scanner is a full-stack network-scanning dashboard. A user enters an IP address and selects a scan mode in the React frontend. The frontend sends that request to a FastAPI backend, which validates it and runs Nmap through the `python-nmap` library. The backend returns port and service information, calculates a rule-based risk score, and saves the scan in a SQLite database. A scikit-learn One-Class SVM can optionally flag results that look unusual compared with scan history. Google Gemini can optionally turn the scan summary into a plain-language report. The project is designed for authorized testing and learning; its risk score is a quick indicator, not proof of a vulnerability.
+
+## How to Demonstrate It
+
+1. Start the backend and frontend using the commands in **Local Setup**.
+2. Open the local dashboard and leave the scan mode on TCP Connect (`-sT`).
+3. For a safe local demonstration, enter `127.0.0.1` to scan the computer running the backend.
+4. Point out the target, timestamp, overall risk score, and port table. Explain that the displayed ports are from Nmap's configured common-port range.
+5. Open History to show that the scan was saved in SQLite.
+6. If a Gemini key is configured, open Reports and generate a report for that saved scan. This step is optional; it is not needed for scanning.
+
+## AI and Machine Learning, Clearly Separated
+
+- **Nmap does the discovery.** It checks the target's selected TCP ports and reports their state and available service details.
+- **The rule engine assigns risk.** Ordinary Python rules turn open ports into a score and labels. This part is deterministic; it is not AI.
+- **The One-Class SVM does anomaly detection.** It uses past scan records as a baseline and can flag a current score/port pattern as unusual. It needs at least 10 saved scans and can be unavailable if its Python dependencies cannot load.
+- **Gemini writes an optional report.** The API sends the chosen scan's target, risk summary, and open-port/service details to the configured Gemini model. Gemini returns explanatory text and suggested mitigations. It does not connect to the target and does not verify vulnerabilities.
+
+In short: Nmap finds ports, the rules score them, the SVM compares patterns, and Gemini explains the result in natural language.
+
+## Common Presentation Questions
+
+**Does scanning require an AI key?** No. Nmap scanning, risk scoring, and history work without Gemini. The key is only for generated reports.
+
+**Is this a complete vulnerability scanner?** No. It scans a limited set of TCP ports and assigns heuristic risk labels. It does not exploit services, test application vulnerabilities, or confirm that a system is compromised.
+
+**Why does the project need a backend?** Browsers cannot safely launch the operating system's Nmap executable. The FastAPI server runs on a machine where Nmap is installed and returns results to the browser.
+
+**What does the AI add?** The optional SVM demonstrates anomaly detection against scan history; Gemini provides a readable report. Nmap and the ordinary scoring rules remain the core of the scan workflow.
+
+**Where are scan results stored?** In a local SQLite database managed by SQLAlchemy. The Settings page can export scan summaries to CSV or clear saved history.
+
+**Can I scan any IP address?** Only scan an address that you own or are authorized to assess. The application validates the address format, but authorization is the operator's responsibility.
 
 ## 1. Project Overview
 
